@@ -31,3 +31,11 @@ void Locker::lockDoor() {
 void Locker::unlockDoor() {
   _doorLock->unlock();
 }
+
+void Locker::onOpen() {
+  Serial.println("Locker: onOpen");
+}
+
+void Locker::onClose() {
+  Serial.println("Locker: onClose");
+}
