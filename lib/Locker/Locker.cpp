@@ -12,8 +12,22 @@ Locker::Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock) {
 
 void Locker::loop() {
   _alarm->loop();
+  _doorSensor->loop();
 }
 
 void Locker::setup() {
   _alarm->setup();
+  _doorSensor->loop();
+}
+
+void Locker::lockDoor() {
+  if (!_doorSensor->closed) {
+    return;
+  }
+
+  _doorLock->lock();
+}
+
+void Locker::unlockDoor() {
+  _doorLock->unlock();
 }

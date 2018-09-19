@@ -4,12 +4,16 @@
 #include <SystemComponent.h>
 #include <Alarm.h>
 #include <DoorSensor.h>
+#include <DoorLock.h>
 
 class Locker: public ISystemComponent {
   public:
     Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock);
-    void setup();
-    void loop();
+    virtual void setup();
+    virtual void loop();
+
+    void lockDoor();
+    void unlockDoor();
   private:
     Alarm *_alarm;
     DoorSensor *_doorSensor;
