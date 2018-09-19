@@ -1,14 +1,15 @@
 #include "Arduino.h"
 #include "DebouncedPin.h"
 
-DebouncedPin::DebouncedPin(int pin, unsigned long debounceDelay, void (*onChange)(int value, bool firstCall)) {
+DebouncedPin::DebouncedPin(int pin, unsigned long debounceDelay) {
   _pin = pin;
   _debounceDelay = _debounceDelay;
-  _onChange = onChange;
   _lastPinValue = LOW;
   _lastDebounceTime = 0;
   _firstCall = true;
+  _handler = NULL;
 }
+
 
 void DebouncedPin::loop() {
   int newPinValue = digitalRead(_pin);
@@ -20,7 +21,9 @@ void DebouncedPin::loop() {
   if (millis() > _lastDebounceTime + _debounceDelay) {
     if (newPinValue != _pinValue) {
       _pinValue = newPinValue;
-      _onChange(!newPinValue, _firstCall);
+      if (_handler != NULL) {
+        _handler->onChange(!newPinValue, _firstCall);
+      }
       _firstCall = false;
     }
   }
@@ -30,4 +33,8 @@ void DebouncedPin::loop() {
 
 void DebouncedPin::setup() {
   pinMode(_pin, INPUT);
+}
+
+void DebouncedPin::setHandler(DebouncedPinHandler *handler) {
+  _handler = handler;
 }

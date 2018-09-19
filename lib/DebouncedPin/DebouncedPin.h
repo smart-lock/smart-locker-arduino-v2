@@ -3,12 +3,15 @@
 
 #include "Arduino.h"
 #include "SystemComponent.h"
+#include <DebouncedPinHandler.h>
+
 
 class DebouncedPin: public ISystemComponent {
   public:
-    DebouncedPin(int pin, unsigned long _debounceDelay, void (*onChange)(int value, bool firstCall));
+    DebouncedPin(int pin, unsigned long _debounceDelay);
     void loop();
     void setup();
+    void setHandler(DebouncedPinHandler *debouncedPinhandler);
   private:
     int _pin;
     int _pinValue;
@@ -16,7 +19,8 @@ class DebouncedPin: public ISystemComponent {
     bool _firstCall;
     unsigned long _lastDebounceTime;
     unsigned long _debounceDelay;
-    void(*_onChange)(int value, bool firstCall);
+    DebouncedPinHandler *_handler;
+
 };
 
 #endif
