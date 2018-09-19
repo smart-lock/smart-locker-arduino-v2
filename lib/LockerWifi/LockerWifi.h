@@ -7,8 +7,8 @@
 class LockerWifi: public ISystemComponent {
   public:
     LockerWifi(const char* ssid, const char* password);
-    void setup();
-    void loop();
+    virtual void setup();
+    virtual void loop();
   private:
     const char* _ssid;
     const char* _password;
