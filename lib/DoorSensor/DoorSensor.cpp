@@ -2,21 +2,13 @@
 #include <DebouncedPin.h>
 #include "Arduino.h"
 
-// void handleSwitchChange (int value, bool firstCall) {
-//     if (value == HIGH) {
-//       onOpen();
-//     } else {
-//       onClose();
-//     }
-//   }
-
-DoorSensor::DoorSensor(int switchPin, void (*onOpen)(void), void (*onClose)(void) ) {
+DoorSensor::DoorSensor(int switchPin) {
   _switchPin = switchPin;
-  unsigned long delay = 500;
 
-  DebouncedPin _debouncedPin(switchPin, delay, [](int value, bool firstCall) {
-    
-  });
+  unsigned long delay = 500;
+  DebouncedPin _debouncedPin(switchPin, delay);
+
+  _debouncedPin.setHandler(this);
 }
 
 void DoorSensor::loop() {
@@ -24,5 +16,16 @@ void DoorSensor::loop() {
 };
 
 void DoorSensor::setup() {
+  
+}
+
+void DoorSensor::onChange(int value, bool firstCall) {
+  if (_handler != NULL) {
+      if (value == HIGH) {
+      _handler->onOpen();
+    } else {
+      _handler->onClose();
+    }
+  }
   
 }

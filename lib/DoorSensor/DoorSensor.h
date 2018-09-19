@@ -3,15 +3,24 @@
 #include <SystemComponent.h>
 #include <DebouncedPin.h>
 
-class DoorSensor: public ISystemComponent {
+
+class DoorSensorHandler {
   public:
-    DoorSensor(int switchPin, void (*onOpenDoor)(void), void (*onClose)(void) );
+    virtual void onOpen();
+    virtual void onClose();
+};
+
+class DoorSensor: public ISystemComponent, public DebouncedPinHandler {
+  public:
+    DoorSensor(int switchPin);
     virtual void loop();
     virtual void setup();
-
+    virtual void onChange(int value, bool firstCall);
+    void setSensorHandler(DoorSensor *handler);
     bool closed;
   private:
     int _switchPin;
+    DoorSensorHandler *_handler;
 };
 
 #endif
