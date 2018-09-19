@@ -5,8 +5,8 @@
 class LockerOTA {
   public:
     LockerOTA();
-    void loop();
-    void setup();
+    virtual void loop();
+    virtual void setup();
 };
 
 #endif
