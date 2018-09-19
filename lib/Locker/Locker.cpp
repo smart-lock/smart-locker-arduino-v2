@@ -8,16 +8,25 @@ Locker::Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock) {
   _alarm = alarm;
   _doorSensor = doorSensor;
   _doorLock = doorLock;
+
+  _doorSensor->setSensorHandler(this);
 }
 
+bool flag = false;
 void Locker::loop() {
-  _alarm->loop();
   _doorSensor->loop();
+
+  if (!flag) {
+    delay(1000);  
+    _alarm->soundAlarm();
+
+    flag = true;
+  }
 }
 
 void Locker::setup() {
   _alarm->setup();
-  _doorSensor->loop();
+  _doorSensor->setup();
 }
 
 void Locker::lockDoor() {
