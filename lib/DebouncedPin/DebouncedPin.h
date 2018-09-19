@@ -2,13 +2,13 @@
 #define DebouncedPin_h
 
 #include "Arduino.h"
+#include "SystemComponent.h"
 
-
-class DebouncedPin
-{
+class DebouncedPin: public ISystemComponent {
   public:
     DebouncedPin(int pin, unsigned long _debounceDelay, void (*onChange)(int value, bool firstCall));
     void loop();
+    void setup();
   private:
     int _pin;
     int _pinValue;

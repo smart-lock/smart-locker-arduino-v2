@@ -2,9 +2,9 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "BasicOTA.h"
+#include "LockerOTA.h"
 
-BasicOTA::BasicOTA() {
+LockerOTA::LockerOTA() {
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -42,6 +42,6 @@ BasicOTA::BasicOTA() {
   Serial.println(WiFi.localIP());
 }
 
-void BasicOTA::loop() {
+void LockerOTA::loop() {
   ArduinoOTA.handle();
 }

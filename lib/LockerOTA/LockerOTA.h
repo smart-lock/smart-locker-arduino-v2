@@ -1,10 +1,10 @@
-#ifndef BasicOTA_h
-#define BasicOTA_h
+#ifndef LockerOTA_h
+#define LockerOTA_h
 #include "Arduino.h"
 
-class BasicOTA {
+class LockerOTA {
   public:
-    BasicOTA();
+    LockerOTA();
     void loop();
     void setup();
 };

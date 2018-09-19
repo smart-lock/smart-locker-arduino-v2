@@ -3,10 +3,10 @@
 #include <Servo.h>
 
 #include <Alarm.h>
-#include <DebouncedPin.h>
-#include <SimpleMQTT.h>
-#include <BasicOTA.h>
-#include <SimpleWifi.h>
+#include "DebouncedPin.h"
+#include <BaseMQTT.h>
+#include <LockerOTA.h>
+#include <LockerWifi.h>
 #include <LockerMQTT.h>
 #include <LockerMQTTInbound.h>
 
@@ -47,7 +47,7 @@ boolean alarm = false;
 String deviceId;
 // ==================================
 
-SimpleWifi wifi(WIFI_SSID, WIFI_PASSWORD);
+LockerWifi wifi(WIFI_SSID, WIFI_PASSWORD);
 WiFiClient espClient;
 PubSubClient client(espClient);
 Servo lockServo;
@@ -214,7 +214,7 @@ void doorClosed() {
 
 
 // ===== MQTT ============================
-SimpleMQTT mqtt(espClient, MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD, MQTT_SERVER, MQTT_PORT, callback);
+BaseMQTT mqtt(espClient, MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD, MQTT_SERVER, MQTT_PORT, callback);
 
 //  ===== SWITCH ============
 void switchSetup() {

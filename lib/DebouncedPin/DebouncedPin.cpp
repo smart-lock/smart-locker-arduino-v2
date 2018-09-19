@@ -2,7 +2,6 @@
 #include "DebouncedPin.h"
 
 DebouncedPin::DebouncedPin(int pin, unsigned long debounceDelay, void (*onChange)(int value, bool firstCall)) {
-  pinMode(pin, INPUT);
   _pin = pin;
   _debounceDelay = _debounceDelay;
   _onChange = onChange;
@@ -27,4 +26,8 @@ void DebouncedPin::loop() {
   }
 
   _lastPinValue = newPinValue;
+}
+
+void DebouncedPin::setup() {
+  pinMode(_pin, INPUT);
 }
