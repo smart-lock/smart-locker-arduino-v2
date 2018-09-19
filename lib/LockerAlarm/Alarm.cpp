@@ -5,9 +5,7 @@ const unsigned long CYCLE_MILLIS = 1000;
 
 Alarm::Alarm(const int pin)
 {
-  pinMode(pin, OUTPUT);
   _pin = pin;
-
   _lastCycle = 0;
 }
 
@@ -17,13 +15,11 @@ void Alarm::printHello() {
 
 
 void Alarm::setup() {
-
+  pinMode(_pin, OUTPUT);
 }
 
 void Alarm::loop() {
-  if (millis() > _lastCycle + CYCLE_MILLIS) {
-    Serial.println("Hello from alarm cycle");
-  }
+
 }
 
 bool Alarm::isActive() {
