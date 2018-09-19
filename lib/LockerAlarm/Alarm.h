@@ -10,10 +10,16 @@ class Alarm: public ISystemComponent
     Alarm(const int pin);
     void printHello();
 
-    void setup();
-    void loop();
+    virtual void setup();
+    virtual void loop();
+
+    void soundAlarm();
+    void stopAlarm();
+
+    bool isActive();
   private:
     int _pin;
+    int _active;
     unsigned long _lastCycle;
 };
 

@@ -25,3 +25,17 @@ void Alarm::loop() {
     Serial.println("Hello from alarm cycle");
   }
 }
+
+bool Alarm::isActive() {
+  return _active;
+}
+
+void Alarm::soundAlarm() {
+  tone(_pin, 440);
+  _active = true;
+}
+
+void Alarm::stopAlarm() {
+  noTone(_pin);
+  _active = false;
+}
