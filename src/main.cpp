@@ -9,6 +9,7 @@
 #include <LockerMQTTInbound.h>
 #include <BaseMQTT.h>
 #include <functional>
+#include <LockerManager.h>
 
 // BOARD
 const int SWITCH_PIN = D3;
@@ -24,21 +25,18 @@ const char* MQTT_CLIENT_ID = "ESP8266Client";
 const char* MQTT_USERNAME = "lbwcbjvj";
 const char* MQTT_PASSWORD = "eND_kmHSQTYb";
 
-DoorSensor *doorSensor = new DoorSensor(SWITCH_PIN, [](int value) {
-  Serial.println(value);
-});
 
 void onConnect(PubSubClient *client) {
   client->subscribe("inTopic");
 }
 
-DoorLock *doorLock = new DoorLock(SERVO_PIN);
-Alarm *alarm = new Alarm(BUZZER_PIN);
-Locker *locker = new Locker(alarm, doorSensor, doorLock);
+LockerManager *lockerManager = new LockerManager();
+
+Locker *locker = new Locker(SWITCH_PIN, SERVO_PIN, BUZZER_PIN);
 
 LockerWifi *lockerWifi = new LockerWifi(WIFI_SSID, WIFI_PASSWORD);
 WiFiClient espClient;
-BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT, mqttCallback, onConnect);
+BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT, lockerManager);
 
 
 void setup() {
