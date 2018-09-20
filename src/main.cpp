@@ -28,13 +28,17 @@ DoorSensor *doorSensor = new DoorSensor(SWITCH_PIN, [](int value) {
   Serial.println(value);
 });
 
+void onConnect(PubSubClient *client) {
+  client->subscribe("inTopic");
+}
+
 DoorLock *doorLock = new DoorLock(SERVO_PIN);
 Alarm *alarm = new Alarm(BUZZER_PIN);
 Locker *locker = new Locker(alarm, doorSensor, doorLock);
 
 LockerWifi *lockerWifi = new LockerWifi(WIFI_SSID, WIFI_PASSWORD);
 WiFiClient espClient;
-BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT, mqttCallback);
+BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT, mqttCallback, onConnect);
 
 
 void setup() {

@@ -1,17 +1,19 @@
 #include <BaseMQTT.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
+#include <functional>
 
 void BaseMQTT::reconnect() {
   // Loop until we're reconnected
-  while (!_client->connected()) {
+  while (!client->connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connecthrome
-    if (_client->connect(_id, _user, _pass)) {
+    if (client->connect(_id, _user, _pass)) {
       Serial.println("connected");
+      onConnect(this->client);
     } else {
       Serial.print("failed, rc=");
-      Serial.print(_client->state());
+      Serial.print(client->state());
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
@@ -19,8 +21,10 @@ void BaseMQTT::reconnect() {
   }
 }
 
-BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, MQTT_CALLBACK_SIGNATURE) {
-  _client = new PubSubClient(domain, port, callback, espClient);
+BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, MQTT_CALLBACK_SIGNATURE, ON_CONNECT_SIGNATURE) {
+  this->client = new PubSubClient(domain, port, callback, espClient);
+  this->client->setCallback(callback);
+  this->onConnect = onConnect;
 }
 
 
@@ -35,8 +39,8 @@ void BaseMQTT::setup() {
 }
 
 void BaseMQTT::loop() {
-  if (!_client->connected()) {
+  if (!client->connected()) {
     reconnect();
   }
-  _client->loop();
+  client->loop();
 }
