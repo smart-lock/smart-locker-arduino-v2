@@ -14,18 +14,21 @@ struct LockerPinGroup {
   int buzzerPin;
 };
 
-class LockerManager: public BaseMQTTHandler, public ISystemComponent {
+class LockerManager: public BaseMQTTHandler, public ISystemComponent, public LockerStateListener {
   public:
     LockerManager(std::vector<LockerPinGroup> lockerPinGroups, BaseMQTT *baseMQTT);
     void init();
     virtual void loop();
     virtual void setup();
+    virtual void onStateChange(char id);
   private:
     std::vector<Locker*> _lockers;
 
     virtual void onConnect();
     virtual void onMessage(char* topic, byte* payload, unsigned int length);
     
+
+    void publishLockerReport(Locker* locker);
     Locker* getLockerById(char id);
     BaseMQTT *_baseMQTT;
 };

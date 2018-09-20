@@ -28,11 +28,6 @@ std::vector<LockerPinGroup> lockerPinGroups = {{
   L1_SWITCH_PIN,
   L1_SERVO_PIN,
   L1_BUZZER_PIN
-}, {
-  '2',
-  L2_SWITCH_PIN,
-  L2_SERVO_PIN,
-  L2_BUZZER_PIN
 }};
 
 

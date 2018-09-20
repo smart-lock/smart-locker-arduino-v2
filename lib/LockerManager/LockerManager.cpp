@@ -19,13 +19,40 @@ const char CMD_SUDO_DEACTIVATE_ALARM ='6';
 
 LockerManager::LockerManager(std::vector<LockerPinGroup> lockerPinGroups, BaseMQTT *baseMQTT) {
   for (LockerPinGroup lockerPinGroup: lockerPinGroups) {
-    _lockers.push_back(new Locker(lockerPinGroup.groupId, lockerPinGroup.switchPin, lockerPinGroup.servoPin, lockerPinGroup.buzzerPin));
+    auto locker = new Locker(lockerPinGroup.groupId, lockerPinGroup.switchPin, lockerPinGroup.servoPin, lockerPinGroup.buzzerPin);
+    locker->setLockerStateListener(this);
+    _lockers.push_back(locker);
   }
   _baseMQTT = baseMQTT;
   baseMQTT->setHandler(this);
   // std::transform(lockerPinGroups.begin(), lockerPinGroups.end(), _lockers.begin(), buildLockerFromLockerPinGroup);
 }
 
+void LockerManager::onStateChange(char id) {
+  Locker* locker = this->getLockerById(id);
+  if (locker == NULL) {
+    return;
+  }
+  this->publishLockerReport(locker);
+}
+
+void LockerManager::publishLockerReport(Locker *locker) {
+  String macAddress = WiFi.macAddress();
+
+  String topic = "lockers/" + macAddress + "/" + locker->id + "/report";
+  String payload =
+    String(locker->isBusy()) + ":" +
+    String(locker->isLocked()) + ":" +
+    String(locker->isClosed()) + ":" +
+    String(locker->isAlarmActive());
+
+  Serial.println("Reporting");
+  Serial.println("Topic: " + topic);
+  Serial.println("Payload: " + payload);
+  this->_baseMQTT->client->publish(topic.c_str(), payload.c_str());
+
+  
+}
 void LockerManager::init() {
 
 }
