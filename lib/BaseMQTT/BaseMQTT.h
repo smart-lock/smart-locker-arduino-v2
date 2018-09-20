@@ -1,6 +1,7 @@
 #ifndef BaseMQTT_h
 #define BaseMQTT_h
 #include <SystemComponent.h>
+#include <BaseMQTTHandler.h>
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <functional>
@@ -12,8 +13,7 @@ class BaseMQTT: public ISystemComponent {
       Client& espClient,
       const char *domain,
       const uint16_t port,
-      MQTT_CALLBACK_SIGNATURE,
-      ON_CONNECT_SIGNATURE
+      BaseMQTTHandler *handler
     );
     virtual void setup();
     virtual void loop();
@@ -23,7 +23,7 @@ class BaseMQTT: public ISystemComponent {
     const char *_id;
     const char *_user;
     const char *_pass;
-    ON_CONNECT_SIGNATURE;
     void reconnect();
+    BaseMQTTHandler *_handler;
 };
 #endif

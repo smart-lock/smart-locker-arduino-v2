@@ -1,4 +1,5 @@
 #include <BaseMQTT.h>
+#include <BaseMQTTHandler.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
 #include <functional>
@@ -10,7 +11,7 @@ void BaseMQTT::reconnect() {
     // Attempt to connecthrome
     if (client->connect(_id, _user, _pass)) {
       Serial.println("connected");
-      onConnect(this->client);
+      _handler->onConnect(client);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client->state());
@@ -21,10 +22,12 @@ void BaseMQTT::reconnect() {
   }
 }
 
-BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, MQTT_CALLBACK_SIGNATURE, ON_CONNECT_SIGNATURE) {
-  this->client = new PubSubClient(domain, port, callback, espClient);
-  this->client->setCallback(callback);
-  this->onConnect = onConnect;
+BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, BaseMQTTHandler *handler) {
+  this->client = new PubSubClient(domain, port, espClient);
+  this->client->setCallback([handler](char* topic, byte* payload, unsigned int length) {
+    handler->onMessage(topic, payload, length);
+  });
+  _handler = handler;
 }
 
 
