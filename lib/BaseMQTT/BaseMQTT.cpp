@@ -11,7 +11,9 @@ void BaseMQTT::reconnect() {
     // Attempt to connecthrome
     if (client->connect(_id, _user, _pass)) {
       Serial.println("connected");
-      _handler->onConnect(client);
+      if (_handler != NULL) {
+        _handler->onConnect();
+      }
     } else {
       Serial.print("failed, rc=");
       Serial.print(client->state());
@@ -22,12 +24,17 @@ void BaseMQTT::reconnect() {
   }
 }
 
-BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, BaseMQTTHandler *handler) {
-  this->client = new PubSubClient(domain, port, espClient);
-  this->client->setCallback([handler](char* topic, byte* payload, unsigned int length) {
-    handler->onMessage(topic, payload, length);
-  });
+void BaseMQTT::setHandler(BaseMQTTHandler *handler) {
   _handler = handler;
+}
+
+BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port) {
+  this->client = new PubSubClient(domain, port, espClient);
+  this->client->setCallback([this](char* topic, byte* payload, unsigned int length) {
+    if (this->_handler != NULL) {
+      this->_handler->onMessage(topic, payload, length);
+    }
+  }); 
 }
 
 

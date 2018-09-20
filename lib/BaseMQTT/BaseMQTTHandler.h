@@ -6,7 +6,7 @@
 
 class BaseMQTTHandler {
   public:
-    virtual void onConnect(PubSubClient *client);
+    virtual void onConnect();
     virtual void onMessage(char* topic, byte* payload, unsigned int length);
 };
 

@@ -12,12 +12,13 @@ class BaseMQTT: public ISystemComponent {
     BaseMQTT(
       Client& espClient,
       const char *domain,
-      const uint16_t port,
-      BaseMQTTHandler *handler
+      const uint16_t port
     );
     virtual void setup();
     virtual void loop();
     void setAuthentication(const char *id, const char *user, const char *pass);
+
+    void setHandler(BaseMQTTHandler *handler);
     PubSubClient *client;
   private:
     const char *_id;
