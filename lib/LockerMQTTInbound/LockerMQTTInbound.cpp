@@ -1,5 +1,6 @@
 #include <LockerMQTTInbound.h>
 #include <LockerMQTT.h>
+#include <Arduino.h>
 
 const char CMD_CLAIM = '1';
 const char CMD_UNCLAIM = '2';
@@ -35,7 +36,7 @@ void handleDeactivateAlarmCmd() {
 }
 
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
   char cmd = (char)payload[0];
   switch (cmd) {
     case CMD_CLAIM:
