@@ -10,6 +10,7 @@ class DoorLock: public ISystemComponent {
     virtual void setup();
     void lock();
     void unlock();
+    bool isLocked();
   private:
     bool _locked;
     Servo _lockServo;

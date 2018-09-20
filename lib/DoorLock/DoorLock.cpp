@@ -27,3 +27,7 @@ void DoorLock::unlock() {
   _locked = false;
   _lockServo.write(SERVO_UNLOCK_ANGLE);
 }
+
+bool DoorLock::isLocked() {
+  return _locked;
+}
