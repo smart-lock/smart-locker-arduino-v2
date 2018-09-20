@@ -15,18 +15,12 @@ Locker::Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock) {
 bool flag = false;
 void Locker::loop() {
   _doorSensor->loop();
-
-  if (!flag) {
-    delay(1000);  
-    _alarm->soundAlarm();
-
-    flag = true;
-  }
 }
 
 void Locker::setup() {
   _alarm->setup();
   _doorSensor->setup();
+  _doorLock->setup();
 }
 
 void Locker::lockDoor() {
