@@ -60,33 +60,35 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
 
   switch (cmd) {
     case CMD_CLAIM:
-      // claim();
+      targetLocker->claimLocker();
       break;
     case CMD_UNCLAIM:
       Serial.println("[" + String(lockerIndex) + "] received: unclaim");
-      // unclaim();
+      targetLocker->freeLocker();
       break;
     case CMD_DEACTIVATE_ALARM:
       Serial.println("[" + String(lockerIndex) + "] received: deactivate_alarm");
-      // handleDeactivateAlarmCmd();
+      targetLocker->stopAlarm();
       break;
     case CMD_SUDO_DEACTIVATE_ALARM:
       Serial.println("[" + String(lockerIndex) + "] received: sudo_deactivate_alarm");
-      // deactivateAlarm();
+      targetLocker->sudoStopAlarm();
       break;
     case CMD_LOCK:
       Serial.println("[" + String(lockerIndex) + "] received: lock");
-      // handleLockCmd();
+
+      targetLocker->lockDoor();
       break;
     case CMD_UNLOCK:
       Serial.println("[" + String(lockerIndex) + "] received: unlock");
-      // handleUnlockCmd();
+
+      targetLocker->unlockDoor();
       break;
   }
 }
 
 void LockerManager::setup() {
-  std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->loop(); });
+  std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->setup(); });
 }
 
 void LockerManager::loop() {
