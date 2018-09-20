@@ -1,20 +1,17 @@
 #include <ESP8266WiFi.h>
 #include <Arduino.h>
-#include <Alarm.h>
-#include <DoorSensor.h>
-#include <DoorLock.h>
-#include <Locker.h>
 #include <LockerWifi.h>
 #include <BaseMQTT.h>
-#include <LockerMQTTInbound.h>
-#include <BaseMQTT.h>
-#include <functional>
 #include <LockerManager.h>
 
 // BOARD
-const int SWITCH_PIN = D3;
-const int SERVO_PIN = D5;
-const int BUZZER_PIN = D4;
+const int L1_SWITCH_PIN = D3;
+const int L1_SERVO_PIN = D5;
+const int L1_BUZZER_PIN = D4;
+
+const int L2_SWITCH_PIN = D0;
+const int L2_SERVO_PIN = D1;
+const int L2_BUZZER_PIN = D2;
 // WIFI
 const char* WIFI_SSID = "grego";
 const char* WIFI_PASSWORD = "Ed47852169Ra";
@@ -26,29 +23,37 @@ const char* MQTT_USERNAME = "lbwcbjvj";
 const char* MQTT_PASSWORD = "eND_kmHSQTYb";
 
 
-void onConnect(PubSubClient *client) {
-  client->subscribe("inTopic");
-}
+std::vector<LockerPinGroup> lockerPinGroups = {{
+  '1',
+  L1_SWITCH_PIN,
+  L1_SERVO_PIN,
+  L1_BUZZER_PIN
+}, {
+  '2',
+  L2_SWITCH_PIN,
+  L2_SERVO_PIN,
+  L2_BUZZER_PIN
+}};
 
-LockerManager *lockerManager = new LockerManager();
 
-Locker *locker = new Locker(SWITCH_PIN, SERVO_PIN, BUZZER_PIN);
+// Locker *locker = new Locker('1', L1_SWITCH_PIN, L1_SERVO_PIN, L1_BUZZER_PIN);
 
 LockerWifi *lockerWifi = new LockerWifi(WIFI_SSID, WIFI_PASSWORD);
 WiFiClient espClient;
-BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT, lockerManager);
+BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT);
+LockerManager *lockerManager = new LockerManager(lockerPinGroups, baseMQTT);
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("System is up");
   lockerWifi->setup();
   baseMQTT->setAuthentication(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
   baseMQTT->setup();
-  locker->setup();
+  lockerManager->setup();
 }
 
 void loop() {
-  locker->loop();
+  lockerManager->loop();
   baseMQTT->loop();
 }
