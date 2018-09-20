@@ -12,7 +12,9 @@ class DoorSensor: public ISystemComponent, public DebouncedPinHandler {
     virtual void setup();
     virtual void onChange(int value, bool firstCall);
     void setSensorHandler(DoorSensorHandler *handler);
+    // TODO: make this private
     bool closed;
+    bool isClosed();
   private:
     int _switchPin;
     DoorSensorHandler *_handler;
