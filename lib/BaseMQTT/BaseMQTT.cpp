@@ -19,16 +19,12 @@ void BaseMQTT::reconnect() {
   }
 }
 
-BaseMQTT::BaseMQTT(Client& espClient, char *domain, uint16_t port, MQTT_CALLBACK_SIGNATURE) {
-  _domain = domain;
-  _port = port;
-  _espClient = espClient;
-
-  _client = new PubSubClient(_domain, _port, callback, espClient);
+BaseMQTT::BaseMQTT(Client& espClient, const char *domain, const uint16_t port, MQTT_CALLBACK_SIGNATURE) {
+  _client = new PubSubClient(domain, port, callback, espClient);
 }
 
 
-void BaseMQTT::setAuthentication(char *id, char *user, char *pass) {
+void BaseMQTT::setAuthentication(const char *id, const char *user, const char *pass) {
   _id = id;
   _user = user;
   _pass = pass;

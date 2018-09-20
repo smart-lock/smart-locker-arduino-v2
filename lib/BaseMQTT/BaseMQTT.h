@@ -6,17 +6,14 @@
 
 class BaseMQTT: public ISystemComponent {
   public:
-    BaseMQTT(Client& espClient, char *domain, uint16_t port, MQTT_CALLBACK_SIGNATURE);
+    BaseMQTT(Client& espClient, const char *domain, const uint16_t port, MQTT_CALLBACK_SIGNATURE);
     virtual void setup();
     virtual void loop();
-    void setAuthentication(char *id, char *user, char *pass);
+    void setAuthentication(const char *id, const char *user, const char *pass);
   private:
-    char *_domain;
-    uint16_t _port;
-    char *_id;
-    char *_user;
-    char *_pass;
-    Client& _espClient;
+    const char *_id;
+    const char *_user;
+    const char *_pass;
     PubSubClient *_client;
     void reconnect();
 };
