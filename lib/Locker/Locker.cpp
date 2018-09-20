@@ -55,6 +55,10 @@ void Locker::onOpen() {
 void Locker::onClose() {
   Serial.println("Locker: onClose");
   this->printState();
+
+  if (!this->_busy) {
+    this->lockDoor();
+  }
 }
 
 void Locker::claimLocker() {
