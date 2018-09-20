@@ -4,12 +4,6 @@
 LockerWifi::LockerWifi(const char* ssid, const char* password) {
  _ssid = ssid;
  _password = password;
-  
-  // byte mac[6];
-  // char macChar[6];
-  // WiFi.macAddress(mac);
-  // byteArrayToCharArray(mac, 6, macChar);
-  // deviceId = String(macChar);
 }
 
 void LockerWifi::setup() {
