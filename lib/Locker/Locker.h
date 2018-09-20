@@ -18,6 +18,10 @@ class Locker: public ISystemComponent, public DoorSensorHandler {
     void claimLocker();
     void freeLocker();
 
+    void soundAlarm();
+    void stopAlarm();
+    void sudoStopAlarm();
+
     char id;
   private:
     Alarm *_alarm;
@@ -27,6 +31,8 @@ class Locker: public ISystemComponent, public DoorSensorHandler {
 
     virtual void onOpen();
     virtual void onClose();
+
+    void printState();
 };
 
 #endif
