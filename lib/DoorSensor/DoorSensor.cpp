@@ -3,7 +3,7 @@
 #include "Arduino.h"
 #include <functional>
 
-DoorSensor::DoorSensor(int switchPin, std::function<void(int value)> f) {
+DoorSensor::DoorSensor(int switchPin) {
   _switchPin = switchPin;
 
   unsigned long delay = 500;

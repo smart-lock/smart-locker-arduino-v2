@@ -7,7 +7,7 @@
 
 class DoorSensor: public ISystemComponent, public DebouncedPinHandler {
   public:
-    DoorSensor(int switchPin, std::function<void(int value)> f);
+    DoorSensor(int switchPin);
     virtual void loop();
     virtual void setup();
     virtual void onChange(int value, bool firstCall);
