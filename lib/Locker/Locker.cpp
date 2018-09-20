@@ -5,7 +5,8 @@
 #include <DoorSensor.h>
 #include <DoorSensor.h>
 
-Locker::Locker(int switchPin, int servoPin, int buzzerPin) {
+Locker::Locker(char id, int switchPin, int servoPin, int buzzerPin) {
+  this->id = id;
   _doorSensor = new DoorSensor(switchPin);
   _doorLock = new DoorLock(servoPin);
   _alarm = new Alarm(buzzerPin);
