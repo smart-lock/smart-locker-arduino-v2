@@ -3,11 +3,12 @@
 #include <Alarm.h>
 #include <DoorLock.h>
 #include <DoorSensor.h>
+#include <DoorSensor.h>
 
-Locker::Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock) {
-  _alarm = alarm;
-  _doorSensor = doorSensor;
-  _doorLock = doorLock;
+Locker::Locker(int switchPin, int servoPin, int buzzerPin) {
+  _doorSensor = new DoorSensor(switchPin);
+  _doorLock = new DoorLock(servoPin);
+  _alarm = new Alarm(buzzerPin);
 
   _doorSensor->setSensorHandler(this);
 }
@@ -41,4 +42,12 @@ void Locker::onOpen() {
 
 void Locker::onClose() {
   Serial.println("Locker: onClose");
+}
+
+void Locker::claimLocker() {
+  _busy = true;
+}
+
+void Locker::freeLocker() {
+  _busy = false;
 }

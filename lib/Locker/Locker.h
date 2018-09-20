@@ -8,17 +8,20 @@
 
 class Locker: public ISystemComponent, public DoorSensorHandler {
   public:
-    Locker(Alarm *alarm, DoorSensor *doorSensor, DoorLock *doorLock);
+    Locker(int switchPin, int servoPin, int buzzerPin);
     virtual void setup();
     virtual void loop();
 
     void lockDoor();
     void unlockDoor();
 
+    void claimLocker();
+    void freeLocker();
   private:
     Alarm *_alarm;
     DoorSensor *_doorSensor;
     DoorLock *_doorLock;
+    bool _busy;
 
     virtual void onOpen();
     virtual void onClose();
