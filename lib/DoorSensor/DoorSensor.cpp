@@ -25,7 +25,6 @@ void DoorSensor::setSensorHandler(DoorSensorHandler *handler) {
   _handler = handler;
 }
 void DoorSensor::onChange(int value, bool firstCall) {
-  Serial.println("here: " + value);
   if (_handler != NULL) {
     // The circuit is closed
     if (value == HIGH) {
