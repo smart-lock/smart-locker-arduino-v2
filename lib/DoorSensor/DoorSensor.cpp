@@ -6,7 +6,7 @@
 DoorSensor::DoorSensor(int switchPin) {
   _switchPin = switchPin;
 
-  unsigned long delay = 1500;
+  unsigned long delay = 2500;
   _debouncedPin = new DebouncedPin(switchPin, delay);
 
   _debouncedPin->setHandler(this);
