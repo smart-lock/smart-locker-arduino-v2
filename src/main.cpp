@@ -9,9 +9,30 @@ const int L1_SWITCH_PIN = D3;
 const int L1_SERVO_PIN = D5;
 const int L1_BUZZER_PIN = D4;
 
-const int L2_SWITCH_PIN = D0;
-const int L2_SERVO_PIN = D1;
-const int L2_BUZZER_PIN = D2;
+/**
+ * T_IRQ
+ * T_DO
+ * T_DIN
+ * T_CS
+ * T_CLK
+ * VCC - 3.3v
+ * GND - GND
+ * CS - D0
+ * RESET - RST
+ * DC - D1
+ * SDI/MOSI - D7
+ * SCK - D2
+ * LED - 3.3v
+ * SDO/MISO - D6
+ * 
+*/
+
+const int LCD_CS = D0;
+const int LCD_DC = D1;
+const int LCD_SDI = D7;
+const int LCD_SCK = D2;
+const int LCD_SDO = D6;
+
 // WIFI
 const char* WIFI_SSID = "grego";
 const char* WIFI_PASSWORD = "Ed47852169Ra";
