@@ -79,7 +79,7 @@ void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker)
   tft.setTextColor(TFT_WHITE);
   tft.setTextSize(4);
   tft.setTextWrap(false);
-  tft.print(locker->id);
+  tft.print(locker->idInCluster);
 }
 
 void View::drawLockerCluster(bool clearScreen) {
@@ -98,7 +98,7 @@ View::View(LockerCluster *lockerCluster) {
 
 
 void View::drawLockerQRCode() {
-  char data[] = {this->_selectedLocker->id};
+  char data[] = {this->_selectedLocker->idInCluster};
 
   tft.fillScreen(TFT_WHITE);
   drawQRCode(
