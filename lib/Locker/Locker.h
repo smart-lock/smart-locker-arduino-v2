@@ -13,7 +13,7 @@ class LockerStateListener {
 
 class Locker: public ISystemComponent, public DoorSensorHandler {
   public:
-    Locker(char id, int switchPin, int servoPin, int buzzerPin);
+    Locker(char idInCluster, const char* id, bool busy, uint8_t switchPin, uint8_t servoPin, uint8_t buzzerPin);
     virtual void setup();
     virtual void loop();
 
@@ -27,7 +27,8 @@ class Locker: public ISystemComponent, public DoorSensorHandler {
     void stopAlarm();
     void sudoStopAlarm();
 
-    char id;
+    char idInCluster;
+    const char* id;
 
     void setLockerStateListener(LockerStateListener *lockerStateListener);
 

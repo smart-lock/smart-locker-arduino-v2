@@ -5,16 +5,15 @@
 #include <DoorSensor.h>
 #include <DoorSensor.h>
 
-Locker::Locker(char id, int switchPin, int servoPin, int buzzerPin) {
+Locker::Locker(char idInCluster, const char* id, bool busy, uint8_t switchPin, uint8_t servoPin, uint8_t buzzerPin) {
+  this->idInCluster = idInCluster;
   this->id = id;
-  _doorSensor = new DoorSensor(switchPin);
-  _doorLock = new DoorLock(servoPin);
-  _alarm = new Alarm(buzzerPin);
-  _busy = false;
-  _doorSensor->setSensorHandler(this);
-
-  this->printState();
-  this->reportToStateListener();
+  this->_doorSensor = new DoorSensor(switchPin);
+  this->_doorLock = new DoorLock(servoPin);
+  this->_alarm = new Alarm(buzzerPin);
+  this->_busy = busy;
+  this->_doorSensor->setSensorHandler(this);
+  this->_lockerStateListener = NULL;
 }
 
 bool flag = false;
@@ -68,8 +67,8 @@ void Locker::onClose() {
 
 void Locker::claimLocker() {
   _busy = true;
-  // this->printState();
-  // this->reportToStateListener();
+  this->printState();
+  this->reportToStateListener();
 }
 
 void Locker::freeLocker() {
@@ -120,7 +119,7 @@ void Locker::printState() {
 
 void Locker::reportToStateListener() {
   if (this->_lockerStateListener != NULL) {
-    this->_lockerStateListener->onStateChange(this->id);
+    this->_lockerStateListener->onStateChange(this->idInCluster);
   }
 }
 void Locker::setLockerStateListener(LockerStateListener *lockerStateListener) {
