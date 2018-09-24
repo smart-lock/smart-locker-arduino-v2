@@ -16,12 +16,15 @@ const char CMD_LOCK ='4';
 const char CMD_UNLOCK = '5';
 const char CMD_SUDO_DEACTIVATE_ALARM ='6';
 
+const char CMD_SELECT_LOCKER='7';
+
 // topic:   lockers/<mac-address>/
 // payload: <locker-index>:<cmd>:<parameters...>
 
-LockerManager::LockerManager(BaseMQTT *baseMQTT, BackendService *backendService) {
+LockerManager::LockerManager(BaseMQTT *baseMQTT, BackendService *backendService, View *view) {
   _baseMQTT = baseMQTT;
   _backendService = backendService;
+  _view = view;
   baseMQTT->setHandler(this);
   _lockerCluster = new LockerCluster();
 }
@@ -75,8 +78,12 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
   char lockerIndex = (char)payload[0];
   char cmd = (char)payload[1];
 
+  Serial.println(lockerIndex);
+  Serial.println(cmd);
+
   Locker* targetLocker = this->getLockerByIdInCluster(lockerIndex);
   if (targetLocker == NULL) {
+    Serial.println("NULL");
     return;
   }
 
@@ -85,6 +92,10 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
   switch (cmd) {
     case CMD_CLAIM:
       targetLocker->claimLocker();
+
+      _view->drawSuccess();
+      delay(3000);
+      _view->drawLockerCluster(true, this->_lockerCluster);
       break;
     case CMD_UNCLAIM:
       Serial.println("[" + String(lockerIndex) + "] received: unclaim");
@@ -103,6 +114,13 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
 
       targetLocker->lockDoor();
       break;
+    // DEBUG ONLY, REMOVE THIS LATER:
+    case CMD_SELECT_LOCKER:
+      Serial.println("[" + String(lockerIndex) + "] received: lock");
+
+      _view->drawLockerQRCode(_lockers[0]);
+      break;
+    //  ---------------------------
     case CMD_UNLOCK:
       Serial.println("[" + String(lockerIndex) + "] received: unlock");
 
@@ -125,10 +143,13 @@ void LockerManager::fetchLockerCluster() {
     _lockerCluster->addLocker(lockerExternal.row, lockerExternal.column, locker);
   }
 }
+
 void LockerManager::setup() {
   _loading = true;
   this->fetchLockerCluster();
   std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->setup(); });
+
+  _view->drawLockerCluster(true, this->_lockerCluster);
   _loading = false;
 }
 

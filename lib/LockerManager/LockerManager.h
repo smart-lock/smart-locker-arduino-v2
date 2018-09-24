@@ -7,10 +7,11 @@
 #include <LockerCluster.h>
 #include <Locker.h>
 #include <BackendService.h>
+#include <View.h>
 
 class LockerManager: public BaseMQTTHandler, public ISystemComponent, public LockerStateListener {
   public:
-    LockerManager(BaseMQTT *baseMQTT, BackendService *backendService);
+    LockerManager(BaseMQTT *baseMQTT, BackendService *backendService, View *view);
     void init();
     virtual void loop();
     virtual void setup();
@@ -21,6 +22,7 @@ class LockerManager: public BaseMQTTHandler, public ISystemComponent, public Loc
     Locker* getLockerByIdInCluster(char idInCluster);
     BaseMQTT *_baseMQTT;
     BackendService *_backendService;
+    View *_view;
     bool _loading;
     
     virtual void onConnect();
