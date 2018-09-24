@@ -22,14 +22,13 @@ void Locker::loop() {
 }
 
 void Locker::setup() {
-  Serial.println("Locker " + String(this->id) + " setup!");
   _alarm->setup();
   _doorSensor->setup();
   _doorLock->setup();
 }
 
 void Locker::lockDoor() {
-  if (!_doorSensor->closed) {
+  if (!_doorSensor->isClosed() || _doorLock->isLocked()) {
     return;
   }
 
@@ -87,6 +86,9 @@ void Locker::freeLocker() {
 }
 
 void Locker::soundAlarm() {
+  if (!this->_alarm->isActive()) {
+    return;
+  }
   this->_alarm->soundAlarm();
 
   this->printState();
