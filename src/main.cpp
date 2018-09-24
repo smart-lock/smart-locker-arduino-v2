@@ -3,35 +3,15 @@
 #include <LockerWifi.h>
 #include <BaseMQTT.h>
 #include <LockerManager.h>
+#include <View.h>
+#include <LockerCluster.h>
+#include <Locker.h>
+#include <BackendService.h>
 
 // BOARD
-const int L1_SWITCH_PIN = D3;
-const int L1_SERVO_PIN = D5;
-const int L1_BUZZER_PIN = D4;
-
-/**
- * T_IRQ
- * T_DO
- * T_DIN
- * T_CS
- * T_CLK
- * VCC - 3.3v
- * GND - GND
- * CS - D0
- * RESET - RST
- * DC - D1
- * SDI/MOSI - D7
- * SCK - D2
- * LED - 3.3v
- * SDO/MISO - D6
- * 
-*/
-
-const int LCD_CS = D0;
-const int LCD_DC = D1;
-const int LCD_SDI = D7;
-const int LCD_SCK = D2;
-const int LCD_SDO = D6;
+const int L1_SWITCH_PIN = D1; // 5
+const int L1_SERVO_PIN = D0;  // 16
+const int L1_BUZZER_PIN = D2; // 4
 
 // WIFI
 const char* WIFI_SSID = "grego";
@@ -42,30 +22,23 @@ const int MQTT_PORT = 14771;
 const char* MQTT_CLIENT_ID = "ESP8266Client";
 const char* MQTT_USERNAME = "lbwcbjvj";
 const char* MQTT_PASSWORD = "eND_kmHSQTYb";
-
-
-std::vector<LockerPinGroup> lockerPinGroups = {{
-  '1',
-  L1_SWITCH_PIN,
-  L1_SERVO_PIN,
-  L1_BUZZER_PIN
-}};
-
-
-// Locker *locker = new Locker('1', L1_SWITCH_PIN, L1_SERVO_PIN, L1_BUZZER_PIN);
+// HTTP
+const char* HTTP_DOMAIN = "192.168.1.34";
+const int HTTP_PORT = 3003;
 
 LockerWifi *lockerWifi = new LockerWifi(WIFI_SSID, WIFI_PASSWORD);
 WiFiClient espClient;
 BaseMQTT *baseMQTT = new BaseMQTT(espClient, MQTT_DOMAIN, MQTT_PORT);
-LockerManager *lockerManager = new LockerManager(lockerPinGroups, baseMQTT);
-
+BackendService *backendService = new BackendService(espClient, HTTP_DOMAIN, HTTP_PORT);
+View *view = new View();
+LockerManager *lockerManager = new LockerManager(baseMQTT, backendService, view);
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("System is up");
   lockerWifi->setup();
   baseMQTT->setAuthentication(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
   baseMQTT->setup();
+  view->setup();
   lockerManager->setup();
 }
 
