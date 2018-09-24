@@ -3,10 +3,11 @@
 
 const unsigned long CYCLE_MILLIS = 1000;
 
-Alarm::Alarm(const int pin)
+Alarm::Alarm(const uint8_t pin)
 {
   _pin = pin;
   _lastCycle = 0;
+  _active = false;
 }
 
 void Alarm::printHello() {

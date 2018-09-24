@@ -7,7 +7,7 @@
 class Alarm: public ISystemComponent
 {
   public:
-    Alarm(const int pin);
+    Alarm(const uint8_t pin);
     void printHello();
 
     virtual void setup();
