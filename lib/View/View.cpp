@@ -82,30 +82,27 @@ void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker)
   tft.print(locker->idInCluster);
 }
 
-void View::drawLockerCluster(bool clearScreen) {
+View::View() {
+
+}
+
+void View::drawLockerCluster(bool clearScreen, LockerCluster *lockerCluster) {
   if (clearScreen) {
     tft.fillScreen(TFT_WHITE);
   }
 
   Locker* subgrid[10][10];
-  extractViewFromGrid(this->_lockerCluster->lockers, visibleColumns, visibleRows, this->cameraX, this->cameraY, subgrid);
+  extractViewFromGrid(lockerCluster->lockers, visibleColumns, visibleRows, this->cameraX, this->cameraY, subgrid);
   drawLockerGrid(subgrid, visibleColumns, visibleRows, 0, 0, this->lcdScreenWidth, this->lcdScreenHeight, drawLocker);
 }
 
-View::View(LockerCluster *lockerCluster) {
-  _lockerCluster = lockerCluster;
-}
-
-
-void View::drawLockerQRCode() {
-  char data[] = {this->_selectedLocker->idInCluster};
-
+void View::drawLockerQRCode(Locker *locker) {
   tft.fillScreen(TFT_WHITE);
   drawQRCode(
     (this->lcdScreenWidth / 2) - (QRCODE_SIZE / 2),
     (this->lcdScreenHeight / 2) - (QRCODE_SIZE / 2),
     QRCODE_SIZE,
-    data,
+    locker->id,
     TFT_BLACK
   );
 }
@@ -125,12 +122,10 @@ void View::drawSuccess() {
 
 void View::setCameraX(int x) {
   this->cameraX = x;
-  this->drawLockerCluster(false);
 }
 
 void View::setCameraY(int y) {
   this->cameraY = y;
-  this->drawLockerCluster(false);
 }
 
 void View::setup() {
