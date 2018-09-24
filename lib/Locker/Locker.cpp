@@ -10,7 +10,7 @@ Locker::Locker(char id, int switchPin, int servoPin, int buzzerPin) {
   _doorSensor = new DoorSensor(switchPin);
   _doorLock = new DoorLock(servoPin);
   _alarm = new Alarm(buzzerPin);
-
+  _busy = false;
   _doorSensor->setSensorHandler(this);
 
   this->printState();
@@ -68,8 +68,8 @@ void Locker::onClose() {
 
 void Locker::claimLocker() {
   _busy = true;
-  this->printState();
-  this->reportToStateListener();
+  // this->printState();
+  // this->reportToStateListener();
 }
 
 void Locker::freeLocker() {
