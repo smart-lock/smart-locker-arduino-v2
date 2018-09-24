@@ -1,23 +1,16 @@
 #include <View.h>
 #include <SPI.h>
-#include <TFT_eSPI.h> // Hardware-specific library
+#include <TFT_eSPI.h>
 #include "qrcode.h"
-
 #include <LockerCluster.h>
 
-#define M_SIZE 1.3333
 #define TFT_GREY 0x5AEB
 
 TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
-
-
-const int16_t rectWidth = 40;
-const int16_t rectHeight = 20;
-
-
 QRCode qrcode;
-
 const uint8_t QRCODE_SIZE = 200;
+const uint8_t visibleColumns = 2;
+const uint8_t visibleRows = 2;
 
 void drawQRCode(int32_t x, int32_t y, int32_t s, const char *data, uint32_t color) {
   uint8_t qrcodeData[qrcode_getBufferSize(2)];
@@ -40,11 +33,6 @@ void drawQRCode(int32_t x, int32_t y, int32_t s, const char *data, uint32_t colo
     }
   }
 }
-
-
-
-uint8_t visibleColumns = 2;
-uint8_t visibleRows = 2;
 
 void extractViewFromGrid (Locker* grid[10][10], uint8_t columns, uint8_t rows, uint8_t cX, uint8_t cY, Locker* subgrid[10][10]) {
   for (uint8_t i = 0; i < rows; i++) {
@@ -94,7 +82,11 @@ void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker)
   tft.print(locker->id);
 }
 
-void View::drawLockerCluster() {
+void View::drawLockerCluster(bool clearScreen) {
+  if (clearScreen) {
+    tft.fillScreen(TFT_WHITE);
+  }
+
   Locker* subgrid[10][10];
   extractViewFromGrid(this->_lockerCluster->lockers, visibleColumns, visibleRows, this->cameraX, this->cameraY, subgrid);
   drawLockerGrid(subgrid, visibleColumns, visibleRows, 0, 0, this->lcdScreenWidth, this->lcdScreenHeight, drawLocker);
@@ -104,34 +96,46 @@ View::View(LockerCluster *lockerCluster) {
   _lockerCluster = lockerCluster;
 }
 
+
+void View::drawLockerQRCode() {
+  char data[] = {this->_selectedLocker->id};
+
+  tft.fillScreen(TFT_WHITE);
+  drawQRCode(
+    (this->lcdScreenWidth / 2) - (QRCODE_SIZE / 2),
+    (this->lcdScreenHeight / 2) - (QRCODE_SIZE / 2),
+    QRCODE_SIZE,
+    data,
+    TFT_BLACK
+  );
+}
+
+void View::selectLocker(Locker *locker) {
+  _selectedLocker = locker;
+}
+
+void View::drawSuccess() {
+  tft.fillScreen(TFT_DARKGREEN);
+  tft.setCursor((this->lcdScreenWidth / 2) - 25, (this->lcdScreenHeight / 2) - 25);
+  tft.setTextColor(TFT_WHITE);
+  tft.setTextSize(5);
+  tft.setTextWrap(false);
+  tft.print("OK !");
+}
+
 void View::setCameraX(int x) {
   this->cameraX = x;
-  this->drawLockerCluster();
+  this->drawLockerCluster(false);
 }
 
 void View::setCameraY(int y) {
   this->cameraY = y;
-  this->drawLockerCluster();
-
+  this->drawLockerCluster(false);
 }
+
 void View::setup() {
   tft.init();
   tft.setRotation(1);
   this->lcdScreenWidth = tft.width();
   this->lcdScreenHeight = tft.height();
-  tft.fillScreen(TFT_WHITE);
-
-  // drawLockerCluster(
-  //   0,
-  //   0,
-  //   width,
-  //   height
-  // );
-  // drawQRCode(
-  //   (width / 2) - (QRCODE_SIZE / 2),
-  //   (height / 2) - (QRCODE_SIZE / 2),
-  //   QRCODE_SIZE,
-  //   "cjmdtr3q3000s0a5842xwqcy1",
-  //   TFT_BLACK
-  // );
 }
