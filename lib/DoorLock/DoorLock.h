@@ -5,7 +5,7 @@
 
 class DoorLock: public ISystemComponent {
   public:
-    DoorLock(int servoPin);
+    DoorLock(uint8_t servoPin);
     virtual void loop();
     virtual void setup();
     void lock();

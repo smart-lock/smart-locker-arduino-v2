@@ -4,8 +4,9 @@
 const int SERVO_LOCK_ANGLE = 180;
 const int SERVO_UNLOCK_ANGLE = 0;
 
-DoorLock::DoorLock(int servoPin) {
+DoorLock::DoorLock(uint8_t servoPin) {
   _servoPin = servoPin;
+  _locked = false;
 }
 
 void DoorLock::loop() {
