@@ -3,10 +3,23 @@
 #include <ArduinoHttpClient.h>
 #include <ESP8266WiFi.h>
 
+
+struct LockerExternal {
+  char idInCluster;
+  const char *id;
+  bool busy;
+  int row;
+  int column;
+  uint8_t sensorPin;
+  uint8_t lockPin;
+  uint8_t alarmPin;
+};
+
+
 class BackendService {
   public:
     BackendService(Client& espClient, const char *domain, const uint16_t port );
-    void fetchLockerCluster(String macAddress);
+    void fetchLockerCluster(String macAddress, std::vector<LockerExternal> *response);
   private:
     HttpClient *_client;
 };
