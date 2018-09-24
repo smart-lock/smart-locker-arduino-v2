@@ -4,33 +4,29 @@
 #include <PubSubClient.h>
 #include <SystemComponent.h>
 #include <BaseMQTT.h>
-
+#include <LockerCluster.h>
 #include <Locker.h>
-
-struct LockerPinGroup {
-  int groupId;
-  int switchPin;
-  int servoPin;
-  int buzzerPin;
-};
+#include <BackendService.h>
 
 class LockerManager: public BaseMQTTHandler, public ISystemComponent, public LockerStateListener {
   public:
-    LockerManager(std::vector<LockerPinGroup> lockerPinGroups, BaseMQTT *baseMQTT);
+    LockerManager(BaseMQTT *baseMQTT, BackendService *backendService);
     void init();
     virtual void loop();
     virtual void setup();
     virtual void onStateChange(char id);
   private:
     std::vector<Locker*> _lockers;
-
+    LockerCluster *_lockerCluster;
+    Locker* getLockerByIdInCluster(char idInCluster);
+    BaseMQTT *_baseMQTT;
+    BackendService *_backendService;
+    bool _loading;
+    
     virtual void onConnect();
     virtual void onMessage(char* topic, byte* payload, unsigned int length);
-    
-
     void publishLockerReport(Locker* locker);
-    Locker* getLockerById(char id);
-    BaseMQTT *_baseMQTT;
+    void fetchLockerCluster();
 };
 
 #endif

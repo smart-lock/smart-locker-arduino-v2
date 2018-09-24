@@ -6,6 +6,8 @@
 #include <string.h>
 #include <Locker.h>
 #include <BaseMQTT.h>
+#include <BackendService.h>
+#include <LockerCluster.h>
 
 const char CMD_CLAIM = '1';
 const char CMD_UNCLAIM = '2';
@@ -17,19 +19,15 @@ const char CMD_SUDO_DEACTIVATE_ALARM ='6';
 // topic:   lockers/<mac-address>/
 // payload: <locker-index>:<cmd>:<parameters...>
 
-LockerManager::LockerManager(std::vector<LockerPinGroup> lockerPinGroups, BaseMQTT *baseMQTT) {
-  for (LockerPinGroup lockerPinGroup: lockerPinGroups) {
-    auto locker = new Locker(lockerPinGroup.groupId, lockerPinGroup.switchPin, lockerPinGroup.servoPin, lockerPinGroup.buzzerPin);
-    locker->setLockerStateListener(this);
-    _lockers.push_back(locker);
-  }
+LockerManager::LockerManager(BaseMQTT *baseMQTT, BackendService *backendService) {
   _baseMQTT = baseMQTT;
+  _backendService = backendService;
   baseMQTT->setHandler(this);
-  // std::transform(lockerPinGroups.begin(), lockerPinGroups.end(), _lockers.begin(), buildLockerFromLockerPinGroup);
+  _lockerCluster = new LockerCluster();
 }
 
 void LockerManager::onStateChange(char id) {
-  Locker* locker = this->getLockerById(id);
+  Locker* locker = this->getLockerByIdInCluster(id);
   if (locker == NULL) {
     return;
   }
@@ -39,7 +37,7 @@ void LockerManager::onStateChange(char id) {
 void LockerManager::publishLockerReport(Locker *locker) {
   String macAddress = WiFi.macAddress();
 
-  String topic = "lockers/" + macAddress + "/" + locker->id + "/report";
+  String topic = "lockers/" + macAddress + "/" + locker->idInCluster + "/report";
   String payload =
     String(locker->isBusy()) + ":" +
     String(locker->isLocked()) + ":" +
@@ -60,13 +58,12 @@ void LockerManager::init() {
 void LockerManager::onConnect() {
   String macAddress = WiFi.macAddress();
   String topic = "lockers/" + macAddress;
-  Serial.println(topic);
   _baseMQTT->client->subscribe(topic.c_str());
 }
 
-Locker* LockerManager::getLockerById (char id) {
+Locker* LockerManager::getLockerByIdInCluster (char idInCluster) {
   for (Locker* locker: _lockers) {
-    if (locker->id == id) {
+    if (locker->idInCluster == idInCluster) {
       return locker;
     }
   }
@@ -78,12 +75,12 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
   char lockerIndex = (char)payload[0];
   char cmd = (char)payload[1];
 
-  Locker* targetLocker = this->getLockerById(lockerIndex);
+  Locker* targetLocker = this->getLockerByIdInCluster(lockerIndex);
   if (targetLocker == NULL) {
     return;
   }
 
-  Serial.println("Locker found " + String(targetLocker->id));
+  Serial.println("Locker found " + String(targetLocker->idInCluster));
 
   switch (cmd) {
     case CMD_CLAIM:
@@ -114,10 +111,30 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
   }
 }
 
+
+void LockerManager::fetchLockerCluster() {
+  String macAddress = WiFi.macAddress();
+  auto cluster = std::vector<LockerExternal>();
+  _backendService->fetchLockerCluster(macAddress, &cluster);
+
+  for (auto lockerExternal: cluster) {
+    Serial.println("New locker  : [" + String(lockerExternal.row) + ", " + String(lockerExternal.column) + "]");
+    Locker *locker = new Locker(lockerExternal.idInCluster, lockerExternal.id, lockerExternal.busy, lockerExternal.sensorPin, lockerExternal.lockPin, lockerExternal.alarmPin);
+    locker->setLockerStateListener(this);
+    _lockers.push_back(locker);
+    _lockerCluster->addLocker(lockerExternal.row, lockerExternal.column, locker);
+  }
+}
 void LockerManager::setup() {
+  _loading = true;
+  this->fetchLockerCluster();
   std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->setup(); });
+  _loading = false;
 }
 
 void LockerManager::loop() {
+  if (_loading) {
+    return;
+  }
   std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->loop(); });
 }
