@@ -3,13 +3,14 @@
 #include <TFT_eSPI.h> // Hardware-specific library
 #include "qrcode.h"
 
+#include <LockerCluster.h>
+
 #define M_SIZE 1.3333
 #define TFT_GREY 0x5AEB
 
 TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
 
-int16_t width;
-int16_t height;
+
 const int16_t rectWidth = 40;
 const int16_t rectHeight = 20;
 
@@ -58,17 +59,13 @@ void drawQRCode(int32_t x, int32_t y, int32_t s, const char *data, uint32_t colo
   }
 }
 
-uint32_t lockerCluster[2][10] = {
-  {true, false, true, false},
-  {false, true, false, true}
-};
 
 uint8_t cameraX = 0;
 uint8_t cameraY = 0;
 uint8_t visibleColumns = 4;
 uint8_t visibleRows = 2;
 
-void extractViewFromGrid (uint32_t grid[10][10], uint8_t columns, uint8_t rows, uint8_t cX, uint8_t cY, uint32_t subgrid[10][10]) {
+void extractViewFromGrid (Locker* grid[10][10], uint8_t columns, uint8_t rows, uint8_t cX, uint8_t cY, Locker* subgrid[10][10]) {
   for (uint8_t i = 0; i < rows; i++) {
     for (uint8_t j = 0; j < columns; j++) {
       subgrid[i][j] = grid[cX + i][cY + j];
@@ -76,35 +73,35 @@ void extractViewFromGrid (uint32_t grid[10][10], uint8_t columns, uint8_t rows, 
   }
 }
 
-#define RENDER_CALLBACK_SIGNATURE std::function<void(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t item)> render
+#define RENDER_CALLBACK_SIGNATURE std::function<void(uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker)> render
 
-void drawGrid (uint32_t grid[10][10], size_t columns, size_t rows, int32_t x, int32_t y, int32_t w, int32_t h, RENDER_CALLBACK_SIGNATURE) {
+void drawLockerGrid (Locker* grid[10][10], size_t columns, size_t rows, int32_t x, int32_t y, int32_t w, int32_t h, RENDER_CALLBACK_SIGNATURE) {
   int cellWidth = w / columns;
   int cellHeight = h / rows;
 
   for (uint8_t i = 0; i < rows; i++) {
     for (uint8_t j = 0; j < columns; j++) {
-      uint32_t item = grid[i][j];
+      Locker *locker = grid[i][j];
 
       render(
         x + (j * cellWidth),
         y + (i * cellHeight),
         cellWidth,
         cellHeight,
-        item
+        locker
       );
     }
   }
 }
 
 
-void drawCell (uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t item) {
+void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker) {
   tft.fillRect(
     x,
     y,
     w,
     h,
-    item ? TFT_DARKGREEN : TFT_GREY
+    locker->isBusy() ? TFT_GREY: TFT_DARKGREEN
   );
 
   tft.setCursor(x + (w / 2) - 10, y + (h / 2) - 10);
@@ -114,10 +111,10 @@ void drawCell (uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t item) {
   tft.print("A");
 }
 
-void drawLockerCluster(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
-  uint32_t subgrid[10][10];
-  extractViewFromGrid(lockerCluster, visibleColumns, visibleRows, cameraX, cameraY, subgrid);
-  drawGrid(subgrid, visibleColumns, visibleRows, x, y, w, h, drawCell);
+void drawLockerCluster(LockerCluster *lockerCluster, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+  Locker* subgrid[10][10];
+  extractViewFromGrid(lockerCluster->lockers, visibleColumns, visibleRows, cameraX, cameraY, subgrid);
+  drawLockerGrid(subgrid, visibleColumns, visibleRows, x, y, w, h, drawLocker);
 }
 
 View::View() {
@@ -127,16 +124,16 @@ View::View() {
 void View::setup() {
   tft.init();
   tft.setRotation(1);
-  width = tft.width();
-  height = tft.height();
+  this->lcdScreenWidth = tft.width();
+  this->lcdScreenHeight = tft.height();
   tft.fillScreen(TFT_WHITE);
 
-  drawLockerCluster(
-    0,
-    0,
-    width,
-    height
-  );
+  // drawLockerCluster(
+  //   0,
+  //   0,
+  //   width,
+  //   height
+  // );
   // drawQRCode(
   //   (width / 2) - (QRCODE_SIZE / 2),
   //   (height / 2) - (QRCODE_SIZE / 2),
