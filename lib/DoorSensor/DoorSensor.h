@@ -7,7 +7,7 @@
 
 class DoorSensor: public ISystemComponent, public DebouncedPinHandler {
   public:
-    DoorSensor(int switchPin);
+    DoorSensor(uint8_t switchPin);
     virtual void loop();
     virtual void setup();
     virtual void onChange(int value, bool firstCall);

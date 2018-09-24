@@ -3,10 +3,10 @@
 #include "Arduino.h"
 #include <functional>
 
-DoorSensor::DoorSensor(int switchPin) {
+DoorSensor::DoorSensor(uint8_t switchPin) {
   _switchPin = switchPin;
 
-  unsigned long delay = 2500;
+  unsigned long delay = 100;
   _debouncedPin = new DebouncedPin(switchPin, delay);
 
   _debouncedPin->setHandler(this);
