@@ -17,24 +17,6 @@ const int16_t rectHeight = 20;
 
 QRCode qrcode;
 
-void generateQRCode() {
-  
-
-  // Top quiet zone
-  Serial.print("\n\n\n\n");
-
-  for (uint8_t y = 0; y < qrcode.size; y++) {
-      // Left quiet zone
-      Serial.print("        ");
-      // Each horizontal module
-      for (uint8_t x = 0; x < qrcode.size; x++) {
-          // Print each module (UTF-8 \u2588 is a solid block)
-          Serial.print(qrcode_getModule(&qrcode, x, y) ? "**": "  ");
-      }
-      Serial.print("\n");
-  }
-}
-
 const uint8_t QRCODE_SIZE = 200;
 
 void drawQRCode(int32_t x, int32_t y, int32_t s, const char *data, uint32_t color) {
@@ -60,15 +42,14 @@ void drawQRCode(int32_t x, int32_t y, int32_t s, const char *data, uint32_t colo
 }
 
 
-uint8_t cameraX = 0;
-uint8_t cameraY = 0;
-uint8_t visibleColumns = 4;
+
+uint8_t visibleColumns = 2;
 uint8_t visibleRows = 2;
 
 void extractViewFromGrid (Locker* grid[10][10], uint8_t columns, uint8_t rows, uint8_t cX, uint8_t cY, Locker* subgrid[10][10]) {
   for (uint8_t i = 0; i < rows; i++) {
     for (uint8_t j = 0; j < columns; j++) {
-      subgrid[i][j] = grid[cX + i][cY + j];
+      subgrid[i][j] = grid[cY + i][cX + j];
     }
   }
 }
@@ -95,32 +76,44 @@ void drawLockerGrid (Locker* grid[10][10], size_t columns, size_t rows, int32_t 
 }
 
 
+uint8_t padding = 10;
+
 void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker) {
   tft.fillRect(
-    x,
-    y,
-    w,
-    h,
+    x + padding,
+    y + padding,
+    w - (padding * 2),
+    h - (padding * 2),
     locker->isBusy() ? TFT_GREY: TFT_DARKGREEN
   );
 
-  tft.setCursor(x + (w / 2) - 10, y + (h / 2) - 10);
+  tft.setCursor(x + (w / 2) - 20, y + (h / 2) - 20);
   tft.setTextColor(TFT_WHITE);
-  tft.setTextSize(2);
+  tft.setTextSize(4);
   tft.setTextWrap(false);
-  tft.print("A");
+  tft.print(locker->id);
 }
 
-void drawLockerCluster(LockerCluster *lockerCluster, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+void View::drawLockerCluster() {
   Locker* subgrid[10][10];
-  extractViewFromGrid(lockerCluster->lockers, visibleColumns, visibleRows, cameraX, cameraY, subgrid);
-  drawLockerGrid(subgrid, visibleColumns, visibleRows, x, y, w, h, drawLocker);
+  extractViewFromGrid(this->_lockerCluster->lockers, visibleColumns, visibleRows, this->cameraX, this->cameraY, subgrid);
+  drawLockerGrid(subgrid, visibleColumns, visibleRows, 0, 0, this->lcdScreenWidth, this->lcdScreenHeight, drawLocker);
 }
 
-View::View() {
-  
+View::View(LockerCluster *lockerCluster) {
+  _lockerCluster = lockerCluster;
 }
 
+void View::setCameraX(int x) {
+  this->cameraX = x;
+  this->drawLockerCluster();
+}
+
+void View::setCameraY(int y) {
+  this->cameraY = y;
+  this->drawLockerCluster();
+
+}
 void View::setup() {
   tft.init();
   tft.setRotation(1);
