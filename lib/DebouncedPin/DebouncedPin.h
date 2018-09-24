@@ -8,12 +8,12 @@
 
 class DebouncedPin: public ISystemComponent {
   public:
-    DebouncedPin(int pin, unsigned long _debounceDelay);
+    DebouncedPin(uint8_t pin, unsigned long _debounceDelay);
     void loop();
     void setup();
     void setHandler(DebouncedPinHandler *debouncedPinhandler);
   private:
-    int _pin;
+    uint8_t _pin;
     int _pinValue;
     int _lastPinValue;
     bool _firstCall;
