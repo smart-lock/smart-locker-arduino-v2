@@ -49,3 +49,33 @@ void BackendService::fetchLockerCluster(String macAddress, std::vector<LockerExt
     lockers->push_back(locker);
   }
 }
+
+void BackendService::fetchNextLocker(String macAddress, LockerExternal* lockerExternal) {
+  Serial.println("making GET request");
+  String endpoint = "/locker-cluster/" + macAddress + "/next-locker";
+
+  _client->get(endpoint.c_str());
+
+  // read the status code and body of the response
+  statusCode = _client->responseStatusCode();
+  response = _client->responseBody();
+
+  Serial.println(statusCode);
+  Serial.println(response);
+
+  if (statusCode == 200) {
+      const size_t capacity = JSON_OBJECT_SIZE(2) + 20;
+      DynamicJsonBuffer jsonBuffer(capacity);
+
+      // Parse JSON object
+      JsonObject& root = jsonBuffer.parseObject(response);
+      
+      if (!root.success()) {
+       return;
+      }
+
+      lockerExternal->id = root["id"];
+      const char *idInCluster = root["idInCluster"].as<char*>();
+      lockerExternal->idInCluster = idInCluster[0];
+  }
+}

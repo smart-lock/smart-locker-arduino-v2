@@ -20,6 +20,7 @@ class BackendService {
   public:
     BackendService(Client& espClient, const char *domain, const uint16_t port );
     void fetchLockerCluster(String macAddress, std::vector<LockerExternal> *response);
+    void fetchNextLocker(String macAddress, LockerExternal* lockerExternal);
   private:
     HttpClient *_client;
 };
