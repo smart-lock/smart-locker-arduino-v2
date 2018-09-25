@@ -9,9 +9,9 @@
 #include <BackendService.h>
 
 // BOARD
-const int L1_SWITCH_PIN = D1; // 5
+const int L1_SWITCH_PIN = D4; // 5
 const int L1_SERVO_PIN = D0;  // 16
-const int L1_BUZZER_PIN = D2; // 4
+const int L1_BUZZER_PIN = D8; // 4
 
 // WIFI
 const char* WIFI_SSID = "grego";
@@ -45,4 +45,6 @@ void setup() {
 void loop() {
   lockerManager->loop();
   baseMQTT->loop();
+  view->loop();
+
 }
