@@ -29,7 +29,8 @@ class Locker: public ISystemComponent, public DoorSensorHandler {
 
     char idInCluster;
     const char* id;
-
+    String idAsString;
+    
     void setLockerStateListener(LockerStateListener *lockerStateListener);
 
     bool isBusy();

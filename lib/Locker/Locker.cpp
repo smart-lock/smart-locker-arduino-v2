@@ -8,6 +8,7 @@
 Locker::Locker(char idInCluster, const char* id, bool busy, uint8_t switchPin, uint8_t servoPin, uint8_t buzzerPin) {
   this->idInCluster = idInCluster;
   this->id = id;
+  this->idAsString = String(id);
   this->_doorSensor = new DoorSensor(switchPin);
   this->_doorLock = new DoorLock(servoPin);
   this->_alarm = new Alarm(buzzerPin);
