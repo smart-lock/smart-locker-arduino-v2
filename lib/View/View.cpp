@@ -3,10 +3,15 @@
 #include <TFT_eSPI.h>
 #include "qrcode.h"
 #include <LockerCluster.h>
+#include "FS.h"
+
 
 #define TFT_GREY 0x5AEB
 
+
 TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
+
+
 QRCode qrcode;
 const uint8_t QRCODE_SIZE = 200;
 const uint8_t visibleColumns = 2;
@@ -83,10 +88,11 @@ void drawLocker (uint32_t x, uint32_t y, uint32_t w, uint32_t h, Locker *locker)
 }
 
 View::View() {
-
+  _tapHandler = NULL;
 }
 
 void View::drawLockerCluster(bool clearScreen, LockerCluster *lockerCluster) {
+  _currentPage = LOCKERS_PAGE;
   if (clearScreen) {
     tft.fillScreen(TFT_WHITE);
   }
@@ -97,21 +103,20 @@ void View::drawLockerCluster(bool clearScreen, LockerCluster *lockerCluster) {
 }
 
 void View::drawLockerQRCode(Locker *locker) {
+  _currentPage = QRCODE_PAGE;
   tft.fillScreen(TFT_WHITE);
   drawQRCode(
     (this->lcdScreenWidth / 2) - (QRCODE_SIZE / 2),
     (this->lcdScreenHeight / 2) - (QRCODE_SIZE / 2),
     QRCODE_SIZE,
-    locker->id,
+    locker->idAsString.c_str(),
     TFT_BLACK
   );
 }
 
-void View::selectLocker(Locker *locker) {
-  _selectedLocker = locker;
-}
 
 void View::drawSuccess() {
+  _currentPage = SUCCESS_PAGE;
   tft.fillScreen(TFT_DARKGREEN);
   tft.setCursor((this->lcdScreenWidth / 2) - 25, (this->lcdScreenHeight / 2) - 25);
   tft.setTextColor(TFT_WHITE);
@@ -133,4 +138,73 @@ void View::setup() {
   tft.setRotation(1);
   this->lcdScreenWidth = tft.width();
   this->lcdScreenHeight = tft.height();
+}
+
+TFT_eSPI_Button key[15];
+
+void View::setTapHandler(TapHandler *tapHandler) {
+  _tapHandler = tapHandler;
+}
+
+void View::handleLockersPageTouch(uint16_t t_x, uint16_t t_y) {
+  bool left = t_x < this->lcdScreenWidth / 2;
+  bool top = t_y < this->lcdScreenHeight / 2;
+  uint8_t xOffset = !left;
+  uint8_t yOffset = !top;
+  _tapHandler->onPressLocker(this->cameraX + xOffset, this->cameraY + yOffset);
+}
+
+void View::handleQRCodePageTouch(uint16_t t_x, uint16_t t_y) {
+  _tapHandler->onPressQRCode();
+}
+void View::loop() {
+  uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
+
+  // Pressed will be set true is there is a valid touch on the screen
+  if (_tapHandler == NULL) {
+    return;
+  }
+
+  if (tft.getTouch(&t_x, &t_y)) {
+    Serial.println(String(t_x) + ", " + String(t_y));
+    switch (_currentPage) {
+      case INITIAL_PAGE:
+        this->handleInitialPageTouch(t_x, t_y);
+        break;
+      case LOCKERS_PAGE: 
+        this->handleLockersPageTouch(t_x, t_y);
+        break;
+      case QRCODE_PAGE:
+        this->handleQRCodePageTouch(t_x, t_y);
+        break;
+    }  
+  }
+}
+
+void View::handleInitialPageTouch(uint16_t t_x, uint16_t t_y) {
+  _tapHandler->onPressClaimLocker();
+}
+
+
+const uint16_t characterWidth = 5;
+const uint16_t characterHeight = 5;
+void drawCenteredText(int16_t x, int16_t y, int16_t color, uint8_t size, const char *s) {
+  uint16_t textWidth = size * strlen(s) * characterWidth;
+  uint16_t textHeight = characterHeight * size;
+
+  tft.setCursor(x - textWidth / 2, y - textHeight / 2);
+  tft.setTextColor(color);
+  tft.setTextSize(size);
+  tft.setTextWrap(false);
+  tft.print("ALUGAR");
+}
+
+void View::drawInitialPage() {
+  _currentPage = INITIAL_PAGE;
+  tft.fillScreen(TFT_ORANGE);
+  drawCenteredText(this->lcdScreenWidth / 2, this->lcdScreenHeight / 2, TFT_WHITE, 5, "ALUGAR");
+}
+
+uint8_t View::getCurrentPage() {
+  return this->_currentPage;
 }
