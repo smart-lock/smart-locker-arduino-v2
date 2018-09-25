@@ -9,13 +9,17 @@
 #include <BackendService.h>
 #include <View.h>
 
-class LockerManager: public BaseMQTTHandler, public ISystemComponent, public LockerStateListener {
+class LockerManager: public BaseMQTTHandler, public ISystemComponent, public LockerStateListener, public TapHandler {
   public:
     LockerManager(BaseMQTT *baseMQTT, BackendService *backendService, View *view);
     void init();
     virtual void loop();
     virtual void setup();
     virtual void onStateChange(char id);
+
+    virtual void onPressLocker(uint8_t row, uint8_t column);
+    virtual void onPressQRCode();
+    virtual void onPressClaimLocker();
   private:
     std::vector<Locker*> _lockers;
     LockerCluster *_lockerCluster;

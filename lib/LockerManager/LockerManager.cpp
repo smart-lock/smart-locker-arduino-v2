@@ -26,6 +26,7 @@ LockerManager::LockerManager(BaseMQTT *baseMQTT, BackendService *backendService,
   _backendService = backendService;
   _view = view;
   baseMQTT->setHandler(this);
+  view->setTapHandler(this);
   _lockerCluster = new LockerCluster();
 }
 
@@ -70,16 +71,13 @@ Locker* LockerManager::getLockerByIdInCluster (char idInCluster) {
       return locker;
     }
   }
-
   return NULL;
 }
 
 void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
   char lockerIndex = (char)payload[0];
   char cmd = (char)payload[1];
-
-  Serial.println(lockerIndex);
-  Serial.println(cmd);
+  Serial.println("Message arrived: idInCluster" + String(lockerIndex) + " cmd: " + String(cmd));
 
   Locker* targetLocker = this->getLockerByIdInCluster(lockerIndex);
   if (targetLocker == NULL) {
@@ -87,15 +85,16 @@ void LockerManager::onMessage(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
-  Serial.println("Locker found " + String(targetLocker->idInCluster));
-
   switch (cmd) {
     case CMD_CLAIM:
       targetLocker->claimLocker();
 
-      _view->drawSuccess();
-      delay(3000);
-      _view->drawLockerCluster(true, this->_lockerCluster);
+      if (_view->getCurrentPage() == QRCODE_PAGE) {
+        _view->drawSuccess();
+        delay(3000);
+        _view->drawInitialPage();
+      }
+
       break;
     case CMD_UNCLAIM:
       Serial.println("[" + String(lockerIndex) + "] received: unclaim");
@@ -136,7 +135,7 @@ void LockerManager::fetchLockerCluster() {
   _backendService->fetchLockerCluster(macAddress, &cluster);
 
   for (auto lockerExternal: cluster) {
-    Serial.println("New locker  : [" + String(lockerExternal.row) + ", " + String(lockerExternal.column) + "]");
+    Serial.println("New locker  : [" + String(lockerExternal.row) + ", " + String(lockerExternal.column) + "] " + lockerExternal.id + " - " + lockerExternal.idInCluster);
     Locker *locker = new Locker(lockerExternal.idInCluster, lockerExternal.id, lockerExternal.busy, lockerExternal.sensorPin, lockerExternal.lockPin, lockerExternal.alarmPin);
     locker->setLockerStateListener(this);
     _lockers.push_back(locker);
@@ -149,7 +148,7 @@ void LockerManager::setup() {
   this->fetchLockerCluster();
   std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->setup(); });
 
-  _view->drawLockerCluster(true, this->_lockerCluster);
+  _view->drawInitialPage();
   _loading = false;
 }
 
@@ -158,4 +157,22 @@ void LockerManager::loop() {
     return;
   }
   std::for_each(_lockers.begin(), _lockers.end(), [](Locker *locker) { locker->loop(); });
+}
+
+
+void LockerManager::onPressLocker(uint8_t row, uint8_t column) {
+  _view->drawLockerQRCode(_lockerCluster->lockers[row][column]);
+}
+
+void LockerManager::onPressQRCode() {
+  _view->drawInitialPage();
+}
+
+void LockerManager::onPressClaimLocker() {
+  String macAddress = WiFi.macAddress();
+
+  LockerExternal lockerExternal;
+  _backendService->fetchNextLocker(macAddress, &lockerExternal);
+  Locker* l = this->getLockerByIdInCluster(lockerExternal.idInCluster);
+  _view->drawLockerQRCode(l);
 }
